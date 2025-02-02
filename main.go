@@ -77,11 +77,10 @@ func getPoints(c *gin.Context) {
 func calculatePoints(receipt Receipt) int {
 	points := 0
 
-	// 1. One point per alphanumeric character in retailer name
 	alphanumeric := regexp.MustCompile("[a-zA-Z0-9]")
 	points += len(alphanumeric.FindAllString(receipt.Retailer, -1))
 
-	// 2. 50 points if total is a round dollar
+	
 	if total, err := strconv.ParseFloat(receipt.Total, 64); err == nil {
 		if total == math.Floor(total) {
 			points += 50
@@ -94,10 +93,9 @@ func calculatePoints(receipt Receipt) int {
 		}
 	}
 
-	// 3. 5 points for every two items
 	points += (len(receipt.Items) / 2) * 5
 
-	// 4. Item description rule
+
 	for _, item := range receipt.Items {
 		desc := strings.TrimSpace(item.ShortDescription)
 		if len(desc)%3 == 0 {
@@ -107,14 +105,14 @@ func calculatePoints(receipt Receipt) int {
 		}
 	}
 
-	// 5. 6 points if purchase date is odd
+	
 	if date, err := time.Parse("2006-01-02", receipt.PurchaseDate); err == nil {
 		if date.Day()%2 != 0 {
 			points += 6
 		}
 	}
 
-	// 6. 10 points if purchase time is between 2:00pm and 4:00pm
+	
 	if t, err := time.Parse("15:04", receipt.PurchaseTime); err == nil {
 		if t.Hour() == 14 || (t.Hour() == 15 && t.Minute() < 60) {
 			points += 10
